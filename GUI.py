@@ -1,29 +1,66 @@
-import customtkinter as ctk
+import tkinter as tk
 from tkinter import ttk
+from tkinter import font
+from tkinter import messagebox
+import customtkinter as ctk
 
-width = 480
-height = 320
+class MusicPlayer(tk.Tk):
+    def __init__(self):
+        super().__init__()
 
-window = ctk.CTk()
-window.geometry("600x440")
-window.title("Music Player ^^")
+        # Load the FontAwesome font
+        self.font_awesome = ctk.CTkFont(family="FontAwesome", size=16)
 
-mainFrame = ttk.Frame(window, width= 480, height = 320, borderwidth=1, relief=ctk.RAISED)
-mainFrame.grid(row=0, column=0)
-queueFrame = ttk.Frame(window, width=120, height=320,borderwidth=1, relief=ctk.RAISED)
-queueFrame.grid(row=0,column=1)
-playerFrame= ttk.Frame(window, width=480, height=120,borderwidth=1, relief=ctk.RAISED)
-playerFrame.grid(row=1,column=0)
-fillFrame= ttk.Frame(window, width=120, height=120,borderwidth=1, relief=ctk.RAISED)
-fillFrame.grid(row=1,column=1)
-createPlaylistButton = ctk.CTkButton(mainFrame, text="Create playlist", command=lambda: print("Playlist Created :0"))
-createPlaylistButton.place(relx=0.5, rely=0.90, anchor= ctk.N)
-playButton = ctk.CTkButton(playerFrame, text =">", command = lambda: print("Playing"))
-playButton.place(relx=0.5, rely=0.5, anchor=ctk.N)
-backButton = ctk.CTkButton(playerFrame, text ="<--", command = lambda: print("Going back"))
-backButton.place(relx=0.15, rely=0.5, anchor=ctk.N)
-forwardButton = ctk.CTkButton(playerFrame, text ="-->", command = lambda: print("Going forward"))
-forwardButton.place(relx=0.85, rely=0.5, anchor=ctk.N)
+        self.title("Music Player ^^")
+        self.geometry("600x440")
+        self.configure(bg='#333')
+        
 
+        main_frame = ctk.CTkFrame(self, width=480, height=320,border_width=1)
+        main_frame.grid(row=0, column=0,sticky="nsew")
 
-window.mainloop()
+        queue_frame = ctk.CTkScrollableFrame(self, width=100, height=300,border_width=1)
+        queue_frame.grid(row=0, column=1,sticky="nsew")
+
+        player_frame = ctk.CTkFrame(self, width=480, height=120,border_width=1)
+        player_frame.grid(row=1, column=0,sticky="nsew")
+
+        fill_frame = ctk.CTkFrame(self, width=120, height=120,border_width=1)
+        fill_frame.grid(row=1, column=1,sticky="nsew")
+
+        create_playlist_button = ctk.CTkButton(main_frame, text="Create", command=self.create_playlist,width=75)
+        create_playlist_button.place(relx=0.15, rely=0.85, anchor=tk.N)
+
+        edit_playlist_button = ctk.CTkButton(main_frame, text="Edit", command=self.create_playlist,width=75)
+        edit_playlist_button.place(relx=0.50, rely=0.85, anchor=tk.N)
+
+        delete_playlist_button = ctk.CTkButton(main_frame, text="Delete", command=self.create_playlist,width=75)
+        delete_playlist_button.place(relx=0.85, rely=0.85, anchor=tk.N)
+
+        play_button = ctk.CTkButton(player_frame, text="\uf04b", font=self.font_awesome, command=self.play_music,width=50)
+        play_button.place(relx=0.5, rely=0.65, anchor=tk.N)
+
+        back_button = ctk.CTkButton(player_frame, text="\uf04a", font=self.font_awesome, command=self.go_back,width=50)
+        back_button.place(relx=0.15, rely=0.65, anchor=tk.N)
+
+        forward_button = ctk.CTkButton(player_frame, text="\uf04e", font=self.font_awesome, command=self.go_forward,width=50)
+        forward_button.place(relx=0.85, rely=0.65, anchor=tk.N)
+
+        shuffle_button = ctk.CTkButton(fill_frame, text="\u21c4", font=self.font_awesome, command=self.go_forward,width=50)
+        shuffle_button.place(relx=0.5, rely=0.65, anchor=tk.N)
+
+    def create_playlist(self):
+        messagebox.showinfo("Playlist", "Playlist Created :0")
+
+    def play_music(self):
+        messagebox.showinfo("Play", "Playing")
+
+    def go_back(self):
+        messagebox.showinfo("Back", "Going back")
+
+    def go_forward(self):
+        messagebox.showinfo("Forward", "Going forward")
+
+if __name__ == "__main__":
+    app = MusicPlayer()
+    app.mainloop()
