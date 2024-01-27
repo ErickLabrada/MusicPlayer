@@ -13,13 +13,12 @@ class MusicPlayer(tk.Tk):
 
         self.title("Music Player ^^")
         self.geometry("600x440")
-        self.configure(bg='#333')
+        self.configure(bg='#484444')
         
-
-        main_frame = ctk.CTkFrame(self, width=480, height=320,border_width=1)
+        main_frame = ctk.CTkFrame(self, width=450, height=310,border_width=1)
         main_frame.grid(row=0, column=0,sticky="nsew")
 
-        queue_frame = ctk.CTkScrollableFrame(self, width=100, height=300,border_width=1)
+        queue_frame = ctk.CTkScrollableFrame(self, width=90, height=310,border_width=1)
         queue_frame.grid(row=0, column=1,sticky="nsew")
 
         player_frame = ctk.CTkFrame(self, width=480, height=120,border_width=1)
@@ -30,6 +29,7 @@ class MusicPlayer(tk.Tk):
 
         create_playlist_button = ctk.CTkButton(main_frame, text="Create", command=self.create_playlist,width=75)
         create_playlist_button.place(relx=0.15, rely=0.85, anchor=tk.N)
+        
 
         edit_playlist_button = ctk.CTkButton(main_frame, text="Edit", command=self.create_playlist,width=75)
         edit_playlist_button.place(relx=0.50, rely=0.85, anchor=tk.N)
