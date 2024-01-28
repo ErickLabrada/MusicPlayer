@@ -127,15 +127,28 @@ class MusicPlayer(tk.Tk):
         if selected_index:
             selected_playlist = playlists_list.get(selected_index[0])  # Get the selected object
            
-            all_songs = [negocio.convert_db_song(db_song) for db_song in DAOs.SongDAO.getAllSongs()]
+            all_songs = [negocio.convert_db_song2(db_song) for db_song in DAOs.SongDAO.getAllSongs()]
             selected_songs = self.showSongSelectionDialog(all_songs)
             
+            print(selected_songs)
+
             if selected_songs:
                 # Insert selected songs into the playlist
                 playlist_name = selected_playlist
+                print("------------------------------------")
                 for song in selected_songs:
-                     # Assuming you have a method to get the song ID
-                    DAOs.PlayListSongDAO.insertSongIntoPlaylist(song.get_name(), selected_playlist)
+                    print ("Name: ",song.get_name())
+                    # Assuming Song has attributes like ID and name
+                    song_name = song.get_name()  # Replace with the actual method to get the name
+    
+                    # Assuming you have a method to get the playlist name
+                    playlist_name = selected_playlist
+    
+                    DAOs.PlayListSongDAO.insertSongIntoPlaylist(song_name, playlist_name)
+
+                else:
+                        print(f"Invalid song format: {song}")
+
                 
                 messagebox.showinfo("Success", "Songs added to the playlist.")
 
@@ -152,27 +165,25 @@ class MusicPlayer(tk.Tk):
             negocio.create_playlist(name)
 
     def play_music(self):
-
         selected_index = playlists_list.curselection()
         if selected_index:
 
             selected_playlist = playlists_list.get(selected_index[0]) 
 
             selected = DAOs.PlayListSongDAO.getPlaylistSongs(selected_playlist)
-            print("Selected",selected)
 
             playlist= [negocio.convert_db_song(db_song) for db_song in selected]
         
-
+        negocio.playlist=playlist
         new_button_text = negocio.play_button(playlist)
         self.play_button.configure(text=new_button_text)
         
 
     def go_back(self):
-        messagebox.showinfo("Back", "Going back")
+        negocio.playPreviousSong()
 
     def go_forward(self):
-        messagebox.showinfo("Forward", "Going forward")
+        negocio.playNextSong()
 
 if __name__ == "__main__":
     app = MusicPlayer()

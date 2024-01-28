@@ -3,17 +3,22 @@ import os
 import eyed3
 import Dominio
 from tkinter import filedialog
+from tkinter import messagebox
 import GUI
 import DAOs
 import tkinter as tk
 
 isPlaying = False
 global songs
-
 pygame.mixer.init()
+global playlistIndex
+playlistIndex=0
+global playlist
+global firstTime
+firstTime=True
 
 def setUp():
-    db_songs = [convert_db_song(db_song) for db_song in DAOs.SongDAO.getAllSongs()]    
+    db_songs = [convert_db_song2(db_song) for db_song in DAOs.SongDAO.getAllSongs()]    
     print("Songs from database:", db_songs,"\n\n")
 
     songs=[]
@@ -66,8 +71,11 @@ def convert_db_playlist(db_playlist):
 
 def convert_db_song(db_song):
     # Convert a tuple from the database to a Song object
-    print("AAAAAAAAAAAAAA",db_song)
     return Dominio.Song(db_song[0], db_song[1], db_song[2])
+
+def convert_db_song2(db_song):
+    # Convert a tuple from the database to a Song object
+    return Dominio.Song(db_song[1], db_song[2], db_song[3])
 
 def getFolderPath():
     return filedialog.askdirectory()
@@ -94,18 +102,20 @@ def create_playlist(name):
 def delete_playlist(name):
     DAOs.PlayListDAO.deletePlaylist(name)
 
-
 def play_button(songs):
-    global isPlaying  # Declare isPlaying as a global variable
-    print("debug")
+
+    playSong(songs)
+    
     if isPlaying:
-        pauseSong()
+        pause_song()
         isPlaying = False
         return "\uf04b"
     else:
-        playSong(songs)
+        resume_song()
         isPlaying = True
         return "\uf04c"
+
+    
 
 def printSongs(songs):
     for song in songs:
@@ -115,14 +125,29 @@ def printSongs(songs):
         #print("Img; "+song.get_cover())
 
 def playSong(songs):
-    print("playing")
-    pygame.mixer.music.load(songs[0].get_url())
+    global playlistIndex
+    pygame.mixer.music.load(songs[playlistIndex].get_url())
     pygame.mixer.music.play()
+    playNextSong(songs)
+
+def resume_song():
+    pygame.mixer.music.resume()
 
 def pause_song():
-    print("Paused")
     pygame.mixer.music.pause()
 
+def playNextSong():
+    global playlistIndex
+    if 0 <= playlistIndex < len(playlist) - 1:
+        playlistIndex += 1
+        playSong(playlist)
+    else:
+        messagebox.showinfo("End Of Playlist")
 
-def pauseSong():
-    print("Paused")
+def playPreviousSong():
+    global playlistIndex
+    if 0 < playlistIndex <= len(playlist):
+        playlistIndex -= 1
+        playSong(playlist)
+    else:
+        playlistIndex = 0
