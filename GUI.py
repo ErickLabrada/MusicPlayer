@@ -2,19 +2,41 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import font
 from tkinter import messagebox
+from tkinter import simpledialog
 import customtkinter as ctk
+import Negocio as negocio
+import Dominio
+import DAOs
+from PIL import Image as PILImage, ImageTk
+
+
+class ListDialog(tk.simpledialog.Dialog):
+    def __init__(self, parent, title, items):
+        self.items = items
+        super().__init__(parent, title)
+
+    def body(self, master):
+        self.listbox = tk.Listbox(master, selectmode=tk.MULTIPLE)
+        for item in self.items:
+            self.listbox.insert(tk.END, item)
+        self.listbox.pack()
+        return self.listbox
+
+    def apply(self):
+        self.result = self.listbox.curselection()
 
 class MusicPlayer(tk.Tk):
     def __init__(self):
         super().__init__()
-
         # Load the FontAwesome font
         self.font_awesome = ctk.CTkFont(family="FontAwesome", size=16)
-
         self.title("Music Player ^^")
         self.geometry("600x440")
         self.configure(bg='#484444')
-        
+        self.resizable(False, False)
+        global playlists_list
+        global main_frame
+
         main_frame = ctk.CTkFrame(self, width=450, height=310,border_width=1)
         main_frame.grid(row=0, column=0,sticky="nsew")
 
@@ -31,14 +53,22 @@ class MusicPlayer(tk.Tk):
         create_playlist_button.place(relx=0.15, rely=0.85, anchor=tk.N)
         
 
-        edit_playlist_button = ctk.CTkButton(main_frame, text="Edit", command=self.create_playlist,width=75)
+        edit_playlist_button = ctk.CTkButton(main_frame, text="Select folder", command=self.select_folder,width=75)
         edit_playlist_button.place(relx=0.50, rely=0.85, anchor=tk.N)
 
-        delete_playlist_button = ctk.CTkButton(main_frame, text="Delete", command=self.create_playlist,width=75)
-        delete_playlist_button.place(relx=0.85, rely=0.85, anchor=tk.N)
+        playlists_list = tk.Listbox(main_frame)
 
-        play_button = ctk.CTkButton(player_frame, text="\uf04b", font=self.font_awesome, command=self.play_music,width=50)
-        play_button.place(relx=0.5, rely=0.65, anchor=tk.N)
+        self.delete_playlist_button = ctk.CTkButton(main_frame, text="Delete", command=self.delete_playlist,width=75)
+        self.delete_playlist_button.place(relx=0.85, rely=0.85, anchor=tk.N)
+
+        self.addSongs_button = ctk.CTkButton(main_frame, text="Add Songs", font=self.font_awesome, command=self.addSongs,width=75)
+        self.addSongs_button.place(relx=0.85, rely=0.15, anchor=tk.N)
+
+        self.deleteSongs_button = ctk.CTkButton(main_frame, text="Delete Songs", font=self.font_awesome, command=self.deleteSongs,width=75)
+        self.deleteSongs_button.place(relx=0.85, rely=0.30, anchor=tk.N)
+
+        self.play_button = ctk.CTkButton(player_frame, text="\uf04b", font=self.font_awesome, command=self.play_music,width=50)
+        self.play_button.place(relx=0.5, rely=0.65, anchor=tk.N)
 
         back_button = ctk.CTkButton(player_frame, text="\uf04a", font=self.font_awesome, command=self.go_back,width=50)
         back_button.place(relx=0.15, rely=0.65, anchor=tk.N)
@@ -49,11 +79,94 @@ class MusicPlayer(tk.Tk):
         shuffle_button = ctk.CTkButton(fill_frame, text="\u21c4", font=self.font_awesome, command=self.go_forward,width=50)
         shuffle_button.place(relx=0.5, rely=0.65, anchor=tk.N)
 
+        negocio.playlist_list_setUp(playlists_list)
+        negocio.setUp()
+
+    def delete_playlist(self):
+        selected_index = playlists_list.curselection()
+        if selected_index:
+            selected_playlist = playlists_list.get(selected_index[0])  # Get the selected object
+            negocio.delete_playlist(selected_playlist)
+            messagebox.showinfo("Success", "Playlist deleted.")
+
+
+    def delete_song(self):
+        selected_index = playlists_list.curselection()
+        if selected_index:
+            selected_song = playlists_list.get(selected_index[0])  # Get the selected object
+            name, artist = str(selected_song).split('|')
+            name = name.strip()  # Remove any leading/trailing spaces
+            artist = artist.strip()
+            song=negocio.getSongByNameAndArtist(name, artist)
+            print(song.get_name())
+
+    def showSongSelectionDialog(self, all_songs):
+        # Create a list of strings to display in the dialog
+        song_strings = [f"{song.get_name()} - {song.get_artist()}" for song in all_songs]
+
+        # Show the dialog
+        dlg = ListDialog(self.master, "Select Songs", song_strings)
+        selected_song_indices = dlg.result
+        print(selected_song_indices)
+
+
+        # Map selected indices to corresponding Song objects
+        selected_songs=[]
+        for index in selected_song_indices:
+            selected_songs.append(all_songs[index])
+        return selected_songs
+
+    
+
+    def apply(self):
+        selected_indices = self.listbox.curselection()
+        self.result = selected_indices
+
+    def addSongs(self):
+        selected_index = playlists_list.curselection()
+        if selected_index:
+            selected_playlist = playlists_list.get(selected_index[0])  # Get the selected object
+           
+            all_songs = [negocio.convert_db_song(db_song) for db_song in DAOs.SongDAO.getAllSongs()]
+            selected_songs = self.showSongSelectionDialog(all_songs)
+            
+            if selected_songs:
+                # Insert selected songs into the playlist
+                playlist_name = selected_playlist
+                for song in selected_songs:
+                     # Assuming you have a method to get the song ID
+                    DAOs.PlayListSongDAO.insertSongIntoPlaylist(song.get_name(), selected_playlist)
+                
+                messagebox.showinfo("Success", "Songs added to the playlist.")
+
+    def deleteSongs(self):
+        print ("b")
+
+    def select_folder(self):
+        negocio.loadSongs()
+
     def create_playlist(self):
-        messagebox.showinfo("Playlist", "Playlist Created :0")
+        name=simpledialog.askstring("Input", "Enter a string:")
+
+        if name:
+            negocio.create_playlist(name)
 
     def play_music(self):
-        messagebox.showinfo("Play", "Playing")
+
+        selected_index = playlists_list.curselection()
+        if selected_index:
+
+            selected_playlist = playlists_list.get(selected_index[0]) 
+
+            selected = DAOs.PlayListSongDAO.getPlaylistSongs(selected_playlist)
+            print("Selected",selected)
+
+            playlist= [negocio.convert_db_song(db_song) for db_song in selected]
+        
+
+        new_button_text = negocio.play_button(playlist)
+        self.play_button.configure(text=new_button_text)
+        
 
     def go_back(self):
         messagebox.showinfo("Back", "Going back")

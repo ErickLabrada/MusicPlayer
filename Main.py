@@ -1,7 +1,10 @@
 import pygame
 import os
 import Negocio as negocio
+import GUI as gui
+import DatabaseManager as database
+import DAOs
 
-songs=negocio.loadSongs()
-negocio.printSongs(songs)
-print("Done")
+database.setUp()
+app = gui.MusicPlayer()
+app.mainloop()

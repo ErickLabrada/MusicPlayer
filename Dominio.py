@@ -1,8 +1,7 @@
 class Song():
-    def __init__(self, name, artist, cover,url):
+    def __init__(self, name, artist,url):
          self.__name = name
          self.__artist = artist
-         self.__cover = cover
          self.__url = url
 
     def get_name(self):
@@ -16,12 +15,6 @@ class Song():
 
     def set_artist(self, artist):
         self.__artist = artist
-
-    def get_cover(self):
-        return self.__cover
-
-    def set_cover(self, cover):
-        self.__cover = cover
     
     def get_url(self):
         return self.__url
@@ -29,7 +22,21 @@ class Song():
     def set_url(self, url):
         self.__url = url
 
-class playlist():
+    def __eq__(self, other):
+        if isinstance(other, Song):
+            return (
+                self._Song__name == other._Song__name and
+                self._Song__artist == other._Song__artist and
+                self._Song__url == other._Song__url
+            )
+        return False
+    def __str__(self):
+        return f"{self._Song__name}|{self._Song__artist}"
+
+
+
+
+class Playlist():
     def __init__(self, name):
          self.__name = name
          self.__songs = []
@@ -48,3 +55,6 @@ class playlist():
 
     def delete_song(self, song):
         self.__songs.remove(song)
+
+    def __str__(self):
+        return f"{self.get_name()}"
