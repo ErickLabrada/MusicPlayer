@@ -141,13 +141,29 @@ class PlayListSongDAO():
 
         DB.closeConnection(connection, cursor)
 
-    def deleteSongFromPlaylist(ID_Song, ID_Playlist):
+    def deleteSongFromPlaylist(songName, playlistName):
         connection, cursor = DB.getConnection()
-        sql = "DELETE FROM PlaylistSongs WHERE (ID_Song, ID_Playlist) = %s,%s"
-        val = (ID_Song, ID_Playlist)
-        cursor.execute(sql, val)
 
-        connection.commit()
+        # Retrieve the ID_Song based on the songName
+        cursor.execute("SELECT ID_Song FROM Songs WHERE Name = %s", (songName,))
+        result_song = cursor.fetchone()
+
+        # Retrieve the ID_Playlist based on the playlistName
+        cursor.execute("SELECT ID_Playlist FROM Playlists WHERE Name = %s", (playlistName,))
+        result_playlist = cursor.fetchone()
+
+        if result_song and result_playlist:
+            ID_Song = result_song[0]
+            ID_Playlist = result_playlist[0]
+
+            sql = "DELETE FROM PlaylistSongs WHERE ID_Song = %s AND ID_Playlist = %s"
+            val = (ID_Song, ID_Playlist)
+            cursor.execute(sql, val)
+
+            connection.commit()
+        else:
+            print(f"Song '{songName}' or Playlist '{playlistName}' not found.")
+
         DB.closeConnection(connection, cursor)
 
     

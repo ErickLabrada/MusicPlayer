@@ -57,7 +57,13 @@ def playlist_list_setUp(playlists_list):
         playlists_list.insert(tk.END, playlist[0]) if playlist else playlists_list.insert(tk.END, "Unknown")
     playlists_list.pack()
 
+def setUpQueue(playlist,queue):
+    
+    queue.delete(0, tk.END)
 
+    for song in playlist:
+        queue.insert(tk.END, song) if playlist else playlists_list.insert(tk.END, "Empty")
+    queue.pack()
 
 def songs_list_setUp(playlists_list):
     db_songs = [convert_db_song(db_song) for db_song in DAOs.SongDAO.getAllSongs()]
@@ -103,9 +109,9 @@ def delete_playlist(name):
     DAOs.PlayListDAO.deletePlaylist(name)
 
 def play_button(songs):
+        
+    global isPlaying
 
-    playSong(songs)
-    
     if isPlaying:
         pause_song()
         isPlaying = False
@@ -124,30 +130,35 @@ def printSongs(songs):
         print("Url: "+song.get_url())
         #print("Img; "+song.get_cover())
 
-def playSong(songs):
+def playSong(songs,index):
     global playlistIndex
+    playlistIndex=index
+    print ("Songs: ", songs)
+    print ("playlistIndex: ", playlistIndex)
+    print ("Song: ", songs[playlistIndex])
+
+
     pygame.mixer.music.load(songs[playlistIndex].get_url())
     pygame.mixer.music.play()
-    playNextSong(songs)
 
 def resume_song():
-    pygame.mixer.music.resume()
+    pygame.mixer.music.unpause()
 
 def pause_song():
     pygame.mixer.music.pause()
 
-def playNextSong():
+def playNextSong(songs):
     global playlistIndex
     if 0 <= playlistIndex < len(playlist) - 1:
         playlistIndex += 1
-        playSong(playlist)
+        playSong(playlist,playlistIndex)
     else:
-        messagebox.showinfo("End Of Playlist")
+        messagebox.showinfo("bruh", "This is already the last song")
 
-def playPreviousSong():
+def playPreviousSong(songs):
     global playlistIndex
     if 0 < playlistIndex <= len(playlist):
         playlistIndex -= 1
-        playSong(playlist)
+        playSong(playlist,playlistIndex)
     else:
-        playlistIndex = 0
+        messagebox.showinfo("bruh", "This is already the first song")
