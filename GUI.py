@@ -95,6 +95,8 @@ class MusicPlayer(tk.Tk):
         if selected_index:
             selected_playlist = playlists_list.get(selected_index[0])  # Get the selected object
             negocio.delete_playlist(selected_playlist)
+            playlists_list.delete(0, tk.END)
+            negocio.playlist_list_setUp(playlists_list)
             messagebox.showinfo("Success", "Playlist deleted.")
 
     def showSongSelectionDialog(self, all_songs):
@@ -188,6 +190,8 @@ class MusicPlayer(tk.Tk):
 
         if name:
             negocio.create_playlist(name)
+            playlists_list.delete(0, tk.END)
+            negocio.playlist_list_setUp(playlists_list)
 
     def start_playlist(self):
         selected_index = playlists_list.curselection()
@@ -198,15 +202,18 @@ class MusicPlayer(tk.Tk):
 
         negocio.playlist = self.current_playlist
         negocio.playlistIndex = 0
-
+        
         negocio.playSong(self.current_playlist, 0)
         negocio.setUpQueue(self.current_playlist, self.current_playlist_frame)  # Use self.current_playlist_frame
+        self.play_music()
 
     
     def play_music(self):
-
-        new_button_text = negocio.play_button(self.current_playlist)
-        self.play_button.configure(text=new_button_text)
+        if not self.current_playlist:
+            messagebox.showinfo("Bruh", "There is no song to play.")
+        else :
+            new_button_text = negocio.play_button(self.current_playlist)
+            self.play_button.configure(text=new_button_text)
         
     def shuffle(self):  # Make shuffle an instance method
         playlist_backup = self.current_playlist
@@ -218,8 +225,14 @@ class MusicPlayer(tk.Tk):
     def go_back(self):
         negocio.playPreviousSong(self.current_playlist)
 
+        if not negocio.isPlaying :
+           self.play_music()
+
     def go_forward(self):
         negocio.playNextSong(self.current_playlist)
+
+        if not negocio.isPlaying :
+           self.play_music() 
 
 if __name__ == "__main__":
     app = MusicPlayer()
